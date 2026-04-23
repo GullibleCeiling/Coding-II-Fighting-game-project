@@ -10,13 +10,14 @@ Part I: Planning & Design (15 pts)
 * Determine win / lose conditions
 * Outline expansion ideas
 
-Game Idea:
+Game Idea: Text and Turn Based fighting game that has at least 10 characters
 
 
-Game Rules:
+Game Rules: Usual Fighting game rules but player 1 can NOT look at player 2's inputs
 
 
-Major Game Elements:
+Major Game Elements: Characters, lore about those characters, input moves, a screen displaying whats going on
 
 
-Gameplay Process:
+Gameplay Process: 2 people go against each other using different moves like kicks, punches, and projectiles
+
