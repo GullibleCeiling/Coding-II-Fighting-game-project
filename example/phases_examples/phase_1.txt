@@ -6,3 +6,6 @@ The goals for this phase include:
  - Sketch a simple plan showing how the game will work step-by-step
 
 Note your decisions here so you can refer back to this later in the project
+
+What I plan on making is a turn and text based fighting game for Coding II for my final
+coding II project using curses, pandas, and object based coding
