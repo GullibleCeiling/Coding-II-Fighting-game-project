@@ -263,3 +263,5 @@ def test_game_has_winner_logic():
 
     g = Game(p1, p2)
     assert g.winner() == "B"
+
+
