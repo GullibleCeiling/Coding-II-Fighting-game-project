@@ -206,7 +206,7 @@ def test_john_scaling_damage():
 
     p1.meter = 3
     msg = p1.attack(p2, "camera")
-    assert "3" in msg
+    assert f"[{p1.meter}]" in msg
 
 
 # =========================

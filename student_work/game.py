@@ -44,10 +44,9 @@ class Feignaz(Character):
             dmg = 7
             other.take_damage(dmg)
             return f"🤼 Feignaz grapples for {dmg} damage!"
-        elif move == "kick":
-            dmg = 4
-            other.take_damage(dmg)
-            return f"🦵 Kick for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"🤼 Feignaz taunts! (meter: {self.meter})"
         elif move == "punch":
             dmg = 5
             other.take_damage(dmg)
@@ -60,10 +59,9 @@ class Kazuki(Character):
             dmg = random.randint(2, 10)
             other.take_damage(dmg)
             return f"⚡ Kazuki rushes for {dmg}!"
-        elif move == "kick":
-            dmg = 4
-            other.take_damage(dmg)
-            return f"🦵 Kick for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"⚡ Kazuki taunts! (meter: {self.meter})"
         elif move == "punch":
             dmg = 5
             other.take_damage(dmg)
@@ -75,10 +73,9 @@ class BrickAndMortar(Character):
         if move == "brick":
             self.pending_actions.append({"turns": 2, "damage": 8, "target": other})
             return "🧱 Mortar launches Brick (hits in 2 turns!)"
-        elif move == "kick":
-            dmg = 4
-            other.take_damage(dmg)
-            return f"🦵 Kick for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"🧱 Brick & Mortar taunt! (meter: {self.meter})"
 
 
 class BurnableDan(Character):
@@ -87,10 +84,9 @@ class BurnableDan(Character):
             dmg = 3
             other.take_damage(dmg)
             return f"🔥 Fireball hits for {dmg}"
-        elif move == "kick":
-            dmg = 4
-            other.take_damage(dmg)
-            return f"🦵 Kick for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"🔥 Burnable Dan taunts! (meter: {self.meter})"
 
 
 class HughMann(Character):
@@ -100,8 +96,11 @@ class HughMann(Character):
             other.take_damage(dmg)
             return f"⚔️ Slashes for {dmg}"
         elif move == "bonk":
-            self.pending_actions.append({"turns": 2, "hits": 3, "target": other})
+            self.pending_actions.append({"turns": 2, "hits": 3, "damage": 6, "target": other})
             return "🔨 Judgement Bonk incoming (3 hits, slow!)"
+        elif move == "taunt":
+            self.meter += 1
+            return f"⚔️ Hugh-Mann taunts! (meter: {self.meter})"
 
 
 class JohnCameraman(Character):
@@ -111,44 +110,56 @@ class JohnCameraman(Character):
             dmg = self.meter
             other.take_damage(dmg)
             return f"📸 Camera hits for {dmg} (meter: {self.meter})"
+        elif move == "taunt":
+            self.meter += 1
+            return f"📸 John Cameraman taunts! (meter: {self.meter})"
 
 
 class PerryPenguin(Character):
     def attack(self, other, move):
         if move == "rush":
-            dmg = random.randint(4, 9)
-            other.take_damage(dmg)
-            return f"🐧 Perry rushes for {dmg}"
-        elif move == "kick":
-            dmg = 4
-            other.take_damage(dmg)
-            return f"🦵 Kick for {dmg}"
+            self.pending_actions.append({"turns": 2, "damage": 8, "hits": 2, "target": other})
+            return "🐧 Perry launches attack (delayed double hit!)"
+        elif move == "taunt":
+            self.meter += 1
+            return f"🐧 Perry Penguin taunts! (meter: {self.meter})"
 
 
 class Catscade(Character):
     def attack(self, other, move):
         if move == "avenge":
-            self.next_bonus = 0
-            return "😾 Catscade prepares Avenge!"
+            self.next_bonus = self.max_health - self.health
+            return f"😾 Catscade prepares Avenge! (bonus: +{self.next_bonus})"
         elif move == "hit":
             dmg = 6 + getattr(self, "next_bonus", 0)
             self.next_bonus = 0
             other.take_damage(dmg)
             return f"🐱 Hit for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"😾 Catscade taunts! (meter: {self.meter})"
 
 
 class BigKeyBoy(Character):
     def attack(self, other, move):
         if move == "crown":
-            self.pending_actions.append({"turns": 2, "damage": 8, "hits": 2, "target": other})
-            return "👑 Crown Toss (delayed double hit!)"
+            dmg = random.randint(4, 9)
+            other.take_damage(dmg)
+            return f"👑 Big Key Boy rushes for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"👑 Big Key Boy taunts! (meter: {self.meter})"
 
 
 class Incrediboy(Character):
     def attack(self, other, move):
-        dmg = 4
-        other.take_damage(dmg)
-        return f"💥 Incrediboy hits for {dmg}"
+        if move == "punch":
+            dmg = 4
+            other.take_damage(dmg)
+            return f"💥 Incrediboy hits for {dmg}"
+        elif move == "taunt":
+            self.meter += 1
+            return f"💥 Incrediboy taunts! (meter: {self.meter})"
 
 
 # =========================
@@ -191,30 +202,30 @@ class Game:
         self.resolve_pending(p)
 
         print(f"\n{p.name}'s turn")
-        print("1 Punch | 2 Kick | 3 Special")
+        print("1 Punch | 2 Taunt | 3 Special")
 
         move = input("Move: ")
 
         if isinstance(p, Feignaz):
-            action = "grapple" if move == "3" else "kick" if move == "2" else "punch"
+            action = "grapple" if move == "3" else "taunt" if move == "2" else "punch"
         elif isinstance(p, Kazuki):
-            action = "rush" if move == "3" else "kick" if move == "2" else "punch"
+            action = "rush" if move == "3" else "taunt" if move == "2" else "punch"
         elif isinstance(p, BrickAndMortar):
-            action = "brick" if move == "3" else "kick"
+            action = "brick" if move == "3" else "taunt"
         elif isinstance(p, BurnableDan):
-            action = "fireball" if move == "3" else "kick"
+            action = "fireball" if move == "3" else "taunt"
         elif isinstance(p, HughMann):
-            action = "bonk" if move == "3" else "slashes"
+            action = "bonk" if move == "3" else "taunt" if move == "2" else "slashes"
         elif isinstance(p, JohnCameraman):
-            action = "camera"
+            action = "camera" if move == "3" else "taunt"
         elif isinstance(p, PerryPenguin):
-            action = "rush" if move == "3" else "kick"
+            action = "rush" if move == "3" else "taunt"
         elif isinstance(p, Catscade):
-            action = "avenge" if move == "3" else "hit"
+            action = "avenge" if move == "3" else "taunt" if move == "2" else "hit"
         elif isinstance(p, BigKeyBoy):
-            action = "crown" if move == "3" else "punch"
+            action = "crown" if move == "3" else "taunt"
         else:
-            action = "punch"
+            action = "taunt" if move == "2" else "punch"
 
         print(p.attack(o, action))
 
@@ -237,16 +248,16 @@ class Game:
 # =========================
 
 roster = {
-    "1": Feignaz("Feignaz", 30, "", "Grappler"),
-    "2": Kazuki("Kazuki", 28, "", "Rushdown"),
-    "3": BrickAndMortar("Brick & Mortar", 32, "", "Puppet Zoner"),
-    "4": BurnableDan("Burnable Dan", 26, "", "Zoner"),
-    "5": HughMann("Hugh-Mann", 35, "", "Big Wrench Installer"),
-    "6": JohnCameraman("John Cameraman", 20, "", "Scaling Joke Character"),
-    "7": PerryPenguin("Perry Penguin", 28, "", "Rushdown"),
-    "8": Catscade("Catscade", 30, "", "Evil Incineroar"),
-    "9": BigKeyBoy("Big Key Boy", 30, "", "Boy Wonder"),
-    "10": Incrediboy("Incrediboy", 25, "", "Joke Character")
+    "1": Feignaz("Feignaz", 75, "", "Grappler"),
+    "2": Kazuki("Kazuki", 75, "", "Rushdown"),
+    "3": BrickAndMortar("Brick & Mortar", 75, "", "Puppet Zoner"),
+    "4": BurnableDan("Burnable Dan", 75, "", "Zoner"),
+    "5": HughMann("Hugh-Mann", 75, "", "Big Wrench Installer"),
+    "6": JohnCameraman("John Cameraman", 75, "", "Scaling Joke Character"),
+    "7": PerryPenguin("Perry Penguin", 75, "", "Rushdown"),
+    "8": Catscade("Catscade", 75, "", "Evil Incineroar"),
+    "9": BigKeyBoy("Big Key Boy", 75, "", "Boy Wonder"),
+    "10": Incrediboy("Incrediboy", 75, "", "Joke Character")
 }
 
 
