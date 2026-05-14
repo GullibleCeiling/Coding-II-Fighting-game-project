@@ -6,16 +6,81 @@ import time
 # ASCII ART
 # =========================
 
-FEIGNAZ_ART = r"""🤼 FEIGNAZ"""
-KAZUKI_ART = r"""⚡ KAZUKI"""
-BRICK_MORTAR_ART = r"""🧱 BRICK & MORTAR"""
-BURNABLE_DAN_ART = r"""🔥 BURNABLE DAN"""
-HUGH_MANN_ART = r"""🔧 HUGH-MANN"""
-JOHN_CAMERAMAN_ART = r"""📹 JOHN CAMERAMAN"""
-PERRY_PENGUIN_ART = r"""🐧 PERRY PENGUIN"""
-CATASCADE_ART = r"""😾 CATASCADE"""
-BIG_KEY_BOY_ART = r"""👑 BIG KEY BOY"""
-INCREDIBOY_ART = r"""💥 INCREDIBOY"""
+FEIGNAZ_ART = r"""
+    [O_O]
+    /| |\
+     | |
+    /   \
+   FEIGNAZ
+"""
+
+KAZUKI_ART = r"""
+    /|||\
+    \||/
+     |
+    / \
+   KAZUKI
+"""
+
+BRICK_MORTAR_ART = r"""
+   [===]
+   [===]
+   [===]
+   BRICK & MORTAR
+"""
+
+BURNABLE_DAN_ART = r"""
+    /\\/\
+    \  /
+    /  \
+    BURNABLE DAN
+"""
+
+HUGH_MANN_ART = r"""
+    [___]
+    | | |
+    | | |
+   /  |  \
+   HUGH-MANN
+"""
+
+JOHN_CAMERAMAN_ART = r"""
+    (O_O)
+    | []|
+    |___|
+    / | \
+   JOHN CAMERAMAN
+"""
+
+PERRY_PENGUIN_ART = r"""
+    / O \
+   /  |  \
+   \ /|\ /
+    \_|_/
+   PERRY PENGUIN
+"""
+
+CATASCADE_ART = r"""
+   /\_/\
+   \ o /
+    (_)
+   CATASCADE
+"""
+
+BIG_KEY_BOY_ART = r"""
+     [*]
+    /| |\
+    | | |
+    / | \
+   BIG KEY BOY
+"""
+
+INCREDIBOY_ART = r"""
+    >O<
+    /|\
+    / \
+   INCREDIBOY
+"""
 
 
 # =========================
@@ -171,6 +236,10 @@ class HughMann(Character):
         elif move == "taunt":
             return self.taunt()
 
+        else:
+            other.take_damage(5)
+            return "👊 Punch 5"
+
 
 class JohnCameraman(Character):
     def attack(self, other, move):
@@ -224,7 +293,8 @@ class Catscade(Character):
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                other.take_damage(10 + self.max_health)
+                missing_health = self.max_health - self.health
+                other.take_damage(10 + missing_health)
                 return "😾 REVENGE STRIKE (-1 meter)"
             return "Not enough meter!"
 
@@ -234,10 +304,10 @@ class Catscade(Character):
 
 class BigKeyBoy(Character):
     def attack(self, other, move):
-        if move == "crown":
+        if move == "key":
             dmg = random.randint(4, 9)
             other.take_damage(dmg)
-            return f"👑 Crown {dmg}"
+            return f"🔑 Key {dmg}"
 
         elif move == "special":
             if self.meter >= 1:
@@ -364,21 +434,21 @@ class Game:
         elif isinstance(p, Kazuki):
             action = "special" if move == "3" else "taunt" if move == "2" else "punch"
         elif isinstance(p, BrickAndMortar):
-            action = "special" if move == "3" else "brick"
+            action = "special" if move == "3" else "taunt" if move == "2" else "brick"
         elif isinstance(p, BurnableDan):
-            action = "special" if move == "3" else "fireball"
+            action = "special" if move == "3" else "taunt" if move == "2" else "fireball"
         elif isinstance(p, HughMann):
-            action = "special" if move == "3" else "slashes"
+            action = "special" if move == "3" else "taunt" if move == "2" else "slashes"
         elif isinstance(p, JohnCameraman):
-            action = "special" if move == "3" else "camera"
+            action = "special" if move == "3" else "taunt" if move == "2" else "camera"
         elif isinstance(p, PerryPenguin):
-            action = "special" if move == "3" else "rush"
+            action = "special" if move == "3" else "taunt" if move == "2" else "rush"
         elif isinstance(p, Catscade):
-            action = "special" if move == "3" else "hit"
+            action = "special" if move == "3" else "taunt" if move == "2" else "hit"
         elif isinstance(p, BigKeyBoy):
-            action = "special" if move == "3" else "crown"
+            action = "special" if move == "3" else "taunt" if move == "2" else "key"
         else:
-            action = "special" if move == "3" else "punch"
+            action = "special" if move == "3" else "taunt" if move == "2" else "punch"
 
         print(p.attack(o, action))
         self.turn += 1

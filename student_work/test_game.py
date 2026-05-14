@@ -229,6 +229,20 @@ def test_catscade_hit_damage():
     assert "hit" in msg.lower()
 
 
+def test_catscade_special_uses_missing_health():
+    p1 = Catscade("C", 30, "", "")
+    p2 = Character("E", 50, "", "")
+
+    p1.health = 10
+    p1.meter = 1
+
+    msg = p1.attack(p2, "special")
+
+    assert "revenge strike" in msg.lower()
+    assert p2.health == 20
+    assert p1.meter == 0
+
+
 # =========================
 # BIG KEY BOY TESTS
 # =========================

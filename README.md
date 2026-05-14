@@ -10,4 +10,6 @@ The cast is small but its mainly balanced
 
 This is only going to be the balanced edition because I want to make an unbalanced version for my friends to play that one and see which they like better and then I will probably get some of their ideas for characters if I make the cast larger in that one.
 
-I wasn't able to use curses how I wanted to with this but instead I tried to use ascii art to make their models but I didn't know how I could make a small ascii art version of Feignaz and Catscade along with Perry Penguin since they have overly exaggerated bodies.
+I wasn't able to use curses how I wanted to with this but instead I tried to use ascii art to make their models.
+
+The controls are 1 for Strike, 2 for taunt and 3 is to use special which requires meter.
