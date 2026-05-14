@@ -1,11 +1,43 @@
-#THis is where the entire game when it is fully done is gonna go
-
 import random
 import time
 
 
 # =========================
-# BASE CHARACTER SYSTEM
+# ASCII ART
+# =========================
+
+FEIGNAZ_ART = r"""🤼 FEIGNAZ"""
+KAZUKI_ART = r"""⚡ KAZUKI"""
+BRICK_MORTAR_ART = r"""🧱 BRICK & MORTAR"""
+BURNABLE_DAN_ART = r"""🔥 BURNABLE DAN"""
+HUGH_MANN_ART = r"""🔧 HUGH-MANN"""
+JOHN_CAMERAMAN_ART = r"""📹 JOHN CAMERAMAN"""
+PERRY_PENGUIN_ART = r"""🐧 PERRY PENGUIN"""
+CATASCADE_ART = r"""😾 CATASCADE"""
+BIG_KEY_BOY_ART = r"""👑 BIG KEY BOY"""
+INCREDIBOY_ART = r"""💥 INCREDIBOY"""
+
+
+# =========================
+# TAUNTS
+# =========================
+
+TAUNT_QUOTES = {
+    "Feignaz": "🤼 'Come here, I just want to talk.'",
+    "Kazuki": "⚡ 'Too slow!'",
+    "Brick & Mortar": "🧱 'We built different.'",
+    "Burnable Dan": "🔥 'This is fine.'",
+    "Hugh-Mann": "🔧 'Judgement is inevitable.'",
+    "John Cameraman": "📸 'Smile, you're on camera!'",
+    "Perry Penguin": "🐧 'Wark wark!'",
+    "Catscade": "😾 'You will regret that.'",
+    "Big Key Boy": "👑 'The crown always wins.'",
+    "Incrediboy": "💥 'I'm incredible!'"
+}
+
+
+# =========================
+# BASE CHARACTER
 # =========================
 
 class Character:
@@ -16,41 +48,50 @@ class Character:
         self.art = art
         self.description = description
 
-        self.defending = False
-        self.pending_actions = []  # for delayed moves (Mortar Brick, etc)
-        self.meter = 0
+        self.pending_actions = []
+        self.meter = 0  # 0–5 max
 
     def is_alive(self):
         return self.health > 0
 
     def take_damage(self, dmg):
-        self.health -= dmg
-        if self.health < 0:
-            self.health = 0
+        self.health = max(0, self.health - dmg)
 
-    def hp_bar(self, length=20):
+    def hp_bar(self):
         ratio = self.health / self.max_health
-        filled = int(ratio * length)
-        return f"[{'█'*filled}{'░'*(length-filled)}] {self.health}/{self.max_health}"
+        bar = "█" * int(ratio * 20) + "░" * (20 - int(ratio * 20))
+        return f"[{bar}] {self.health}/{self.max_health}"
+
+    # ✅ meter capped at 5
+    def taunt(self):
+        if self.meter < 5:
+            self.meter += 1
+        return f"{TAUNT_QUOTES.get(self.name, self.name + ' taunts!')} (meter: {self.meter}/5)"
 
 
 # =========================
-# CHARACTER IMPLEMENTATIONS
+# CHARACTERS
 # =========================
 
 class Feignaz(Character):
     def attack(self, other, move):
         if move == "grapple":
-            dmg = 7
-            other.take_damage(dmg)
-            return f"🤼 Feignaz grapples for {dmg} damage!"
+            other.take_damage(7)
+            return "🤼 Grapple 7"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                other.take_damage(20)
+                return "🤼 SPECIAL GRAPPLE (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"🤼 Feignaz taunts! (meter: {self.meter})"
-        elif move == "punch":
-            dmg = 5
-            other.take_damage(dmg)
-            return f"👊 Punch for {dmg}"
+            return self.taunt()
+
+        else:
+            other.take_damage(5)
+            return "👊 Punch 5"
 
 
 class Kazuki(Character):
@@ -58,86 +99,137 @@ class Kazuki(Character):
         if move == "rush":
             dmg = random.randint(2, 10)
             other.take_damage(dmg)
-            return f"⚡ Kazuki rushes for {dmg}!"
+            return f"⚡ Rush {dmg}"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                dmg = random.randint(10, 20)
+                other.take_damage(dmg)
+                return f"⚡ OVERDRIVE {dmg} (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"⚡ Kazuki taunts! (meter: {self.meter})"
-        elif move == "punch":
-            dmg = 5
-            other.take_damage(dmg)
-            return f"👊 Punch for {dmg}"
+            return self.taunt()
+
+        else:
+            other.take_damage(5)
+            return "👊 Punch 5"
 
 
 class BrickAndMortar(Character):
     def attack(self, other, move):
         if move == "brick":
             self.pending_actions.append({"turns": 2, "damage": 8, "target": other})
-            return "🧱 Mortar launches Brick (hits in 2 turns!)"
+            return "🧱 Brick incoming"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                self.pending_actions.append({"turns": 1, "damage": 15, "hits": 2, "target": other})
+                return "🧱 BUILDING COLLAPSE (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"🧱 Brick & Mortar taunt! (meter: {self.meter})"
+            return self.taunt()
 
 
 class BurnableDan(Character):
     def attack(self, other, move):
         if move == "fireball":
-            dmg = 3
-            other.take_damage(dmg)
-            return f"🔥 Fireball hits for {dmg}"
+            other.take_damage(3)
+            return "🔥 Fireball"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                other.take_damage(18)
+                return "🔥 INFERNO (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"🔥 Burnable Dan taunts! (meter: {self.meter})"
+            return self.taunt()
 
 
 class HughMann(Character):
     def attack(self, other, move):
-        if move == "slashes":
-            dmg = 6
-            other.take_damage(dmg)
-            return f"⚔️ Slashes for {dmg}"
-        elif move == "bonk":
+        if move == "bonk":
             self.pending_actions.append({"turns": 2, "hits": 3, "damage": 6, "target": other})
-            return "🔨 Judgement Bonk incoming (3 hits, slow!)"
+            return "🔨 Bonk incoming"
+
+        elif move == "slashes":
+            other.take_damage(6)
+            return "⚔️ Slashes"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                other.take_damage(25)
+                return "🔧 FINAL JUDGEMENT (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"⚔️ Hugh-Mann taunts! (meter: {self.meter})"
+            return self.taunt()
 
 
 class JohnCameraman(Character):
     def attack(self, other, move):
         if move == "camera":
             self.meter += 1
+            self.meter = min(5, self.meter)
             dmg = self.meter
             other.take_damage(dmg)
-            return f"📸 Camera hits for {dmg} (meter: {self.meter})"
+            return f"📸 Camera {dmg}"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                other.take_damage(15)
+                return "📸 VIRAL SHOT (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"📸 John Cameraman taunts! (meter: {self.meter})"
+            return self.taunt()
 
 
 class PerryPenguin(Character):
     def attack(self, other, move):
         if move == "rush":
             self.pending_actions.append({"turns": 2, "damage": 8, "hits": 2, "target": other})
-            return "🐧 Perry launches attack (delayed double hit!)"
+            return "🐧 Rush delayed"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                self.pending_actions.append({"turns": 1, "damage": 10, "hits": 4, "target": other})
+                return "🐧 ANTARCTIC FURY (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"🐧 Perry Penguin taunts! (meter: {self.meter})"
+            return self.taunt()
 
 
 class Catscade(Character):
     def attack(self, other, move):
         if move == "avenge":
             self.next_bonus = self.max_health - self.health
-            return f"😾 Catscade prepares Avenge! (bonus: +{self.next_bonus})"
+            return "😾 Avenge ready"
+
         elif move == "hit":
             dmg = 6 + getattr(self, "next_bonus", 0)
             self.next_bonus = 0
             other.take_damage(dmg)
-            return f"🐱 Hit for {dmg}"
+            return f"🐱 Hit {dmg}"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                other.take_damage(10 + self.max_health)
+                return "😾 REVENGE STRIKE (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"😾 Catscade taunts! (meter: {self.meter})"
+            return self.taunt()
 
 
 class BigKeyBoy(Character):
@@ -145,21 +237,77 @@ class BigKeyBoy(Character):
         if move == "crown":
             dmg = random.randint(4, 9)
             other.take_damage(dmg)
-            return f"👑 Big Key Boy rushes for {dmg}"
+            return f"👑 Crown {dmg}"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                dmg = random.randint(15, 25)
+                other.take_damage(dmg)
+                return "👑 KING'S EXECUTION (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"👑 Big Key Boy taunts! (meter: {self.meter})"
+            return self.taunt()
 
 
 class Incrediboy(Character):
     def attack(self, other, move):
         if move == "punch":
-            dmg = 4
-            other.take_damage(dmg)
-            return f"💥 Incrediboy hits for {dmg}"
+            other.take_damage(4)
+            return "💥 Punch"
+
+        elif move == "special":
+            if self.meter >= 1:
+                self.meter -= 1
+                other.take_damage(30)
+                return "💥 I'M INCREDIBLE (-1 meter)"
+            return "Not enough meter!"
+
         elif move == "taunt":
-            self.meter += 1
-            return f"💥 Incrediboy taunts! (meter: {self.meter})"
+            return self.taunt()
+
+
+# =========================
+# ROSTER
+# =========================
+
+roster = {
+    "1": Feignaz("Feignaz", 75, FEIGNAZ_ART, "Grappler"),
+    "2": Kazuki("Kazuki", 75, KAZUKI_ART, "Rushdown"),
+    "3": BrickAndMortar("Brick & Mortar", 75, BRICK_MORTAR_ART, "Zoner"),
+    "4": BurnableDan("Burnable Dan", 75, BURNABLE_DAN_ART, "Zoner"),
+    "5": HughMann("Hugh-Mann", 75, HUGH_MANN_ART, "Bruiser"),
+    "6": JohnCameraman("John Cameraman", 75, JOHN_CAMERAMAN_ART, "Scaling"),
+    "7": PerryPenguin("Perry Penguin", 75, PERRY_PENGUIN_ART, "Rushdown"),
+    "8": Catscade("Catscade", 75, CATASCADE_ART, "Risk"),
+    "9": BigKeyBoy("Big Key Boy", 75, BIG_KEY_BOY_ART, "All-rounder"),
+    "10": Incrediboy("Incrediboy", 75, INCREDIBOY_ART, "Joke")
+}
+
+
+# =========================
+# PICK
+# =========================
+
+def pick(name):
+    print(f"\n{name}, choose character:")
+    for k, v in roster.items():
+        print(f"{k}. {v.name} - {v.description}")
+
+    choice = input("Pick: ")
+    while choice not in roster:
+        choice = input("Pick valid number: ")
+
+    template = roster[choice]
+    print(template.art)
+
+    return type(template)(
+        template.name,
+        template.max_health,
+        template.art,
+        template.description
+    )
 
 
 # =========================
@@ -177,59 +325,23 @@ class Game:
     def other(self):
         return self.players[(self.turn + 1) % 2]
 
-    def resolve_pending(self, player):
-        new_queue = []
-        for action in player.pending_actions:
-            action["turns"] -= 1
-
-            if action["turns"] <= 0:
-                if "hits" in action:
-                    for _ in range(action["hits"]):
-                        action["target"].take_damage(action["damage"])
-                    print(f"💥 Delayed multi-hit lands for {action['damage']} x{action['hits']}")
+    def resolve(self, player):
+        new = []
+        for a in player.pending_actions:
+            a["turns"] -= 1
+            if a["turns"] <= 0:
+                if "hits" in a:
+                    for _ in range(a["hits"]):
+                        a["target"].take_damage(a["damage"])
                 else:
-                    action["target"].take_damage(action["damage"])
-                    print(f"💥 Delayed attack hits for {action['damage']}")
+                    a["target"].take_damage(a["damage"])
             else:
-                new_queue.append(action)
+                new.append(a)
+        player.pending_actions = new
 
-        player.pending_actions = new_queue
-
-    def take_turn(self):
-        p = self.current()
-        o = self.other()
-
-        self.resolve_pending(p)
-
-        print(f"\n{p.name}'s turn")
-        print("1 Punch | 2 Taunt | 3 Special")
-
-        move = input("Move: ")
-
-        if isinstance(p, Feignaz):
-            action = "grapple" if move == "3" else "taunt" if move == "2" else "punch"
-        elif isinstance(p, Kazuki):
-            action = "rush" if move == "3" else "taunt" if move == "2" else "punch"
-        elif isinstance(p, BrickAndMortar):
-            action = "brick" if move == "3" else "taunt"
-        elif isinstance(p, BurnableDan):
-            action = "fireball" if move == "3" else "taunt"
-        elif isinstance(p, HughMann):
-            action = "bonk" if move == "3" else "taunt" if move == "2" else "slashes"
-        elif isinstance(p, JohnCameraman):
-            action = "camera" if move == "3" else "taunt"
-        elif isinstance(p, PerryPenguin):
-            action = "rush" if move == "3" else "taunt"
-        elif isinstance(p, Catscade):
-            action = "avenge" if move == "3" else "taunt" if move == "2" else "hit"
-        elif isinstance(p, BigKeyBoy):
-            action = "crown" if move == "3" else "taunt"
-        else:
-            action = "taunt" if move == "2" else "punch"
-
-        print(p.attack(o, action))
-
-        self.turn += 1
+    def status(self):
+        for p in self.players:
+            print(f"{p.name}: {p.hp_bar()} | Meter: {p.meter}/5")
 
     def is_over(self):
         return any(not p.is_alive() for p in self.players)
@@ -238,35 +350,43 @@ class Game:
         alive = [p for p in self.players if p.is_alive()]
         return alive[0].name if alive else "None"
 
-    def status(self):
-        for p in self.players:
-            print(f"{p.name}: {p.hp_bar()}")
+    def take_turn(self):
+        p = self.current()
+        o = self.other()
+
+        self.resolve(p)
+
+        print(f"\n{p.name}'s turn")
+        move = input("1 Punch | 2 Taunt | 3 Special: ")
+
+        if isinstance(p, Feignaz):
+            action = "special" if move == "3" else "taunt" if move == "2" else "punch"
+        elif isinstance(p, Kazuki):
+            action = "special" if move == "3" else "taunt" if move == "2" else "punch"
+        elif isinstance(p, BrickAndMortar):
+            action = "special" if move == "3" else "brick"
+        elif isinstance(p, BurnableDan):
+            action = "special" if move == "3" else "fireball"
+        elif isinstance(p, HughMann):
+            action = "special" if move == "3" else "slashes"
+        elif isinstance(p, JohnCameraman):
+            action = "special" if move == "3" else "camera"
+        elif isinstance(p, PerryPenguin):
+            action = "special" if move == "3" else "rush"
+        elif isinstance(p, Catscade):
+            action = "special" if move == "3" else "hit"
+        elif isinstance(p, BigKeyBoy):
+            action = "special" if move == "3" else "crown"
+        else:
+            action = "special" if move == "3" else "punch"
+
+        print(p.attack(o, action))
+        self.turn += 1
 
 
 # =========================
-# CHARACTER SELECT
+# GAME START
 # =========================
-
-roster = {
-    "1": Feignaz("Feignaz", 75, "", "Grappler"),
-    "2": Kazuki("Kazuki", 75, "", "Rushdown"),
-    "3": BrickAndMortar("Brick & Mortar", 75, "", "Puppet Zoner"),
-    "4": BurnableDan("Burnable Dan", 75, "", "Zoner"),
-    "5": HughMann("Hugh-Mann", 75, "", "Big Wrench Installer"),
-    "6": JohnCameraman("John Cameraman", 75, "", "Scaling Joke Character"),
-    "7": PerryPenguin("Perry Penguin", 75, "", "Rushdown"),
-    "8": Catscade("Catscade", 75, "", "Evil Incineroar"),
-    "9": BigKeyBoy("Big Key Boy", 75, "", "Boy Wonder"),
-    "10": Incrediboy("Incrediboy", 75, "", "Joke Character")
-}
-
-
-def pick(name):
-    print(f"\n{name}, choose character:")
-    for k, v in roster.items():
-        print(f"{k}. {v.name} - {v.description}")
-    return roster[input("Pick: ")]
-
 
 def play():
     p1 = pick("Player 1")
@@ -275,11 +395,13 @@ def play():
     game = Game(p1, p2)
 
     while not game.is_over():
-        print("\n" + "="*30)
+        print("\n" + "=" * 30)
         game.status()
         game.take_turn()
 
-    print(f"\n🏆 {game.winner()} wins!")
+    print("\n" + "█" * 60)
+    print(f"🏆 {game.winner().upper()} WINS!")
+    print("█" * 60)
 
 
 if __name__ == "__main__":
