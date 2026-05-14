@@ -122,6 +122,9 @@ class Character:
     def take_damage(self, dmg):
         self.health = max(0, self.health - dmg)
 
+    def heal(self, amount=5):
+        self.health = min(self.max_health, self.health + amount)
+
     def hp_bar(self):
         ratio = self.health / self.max_health
         bar = "█" * int(ratio * 20) + "░" * (20 - int(ratio * 20))
@@ -142,7 +145,7 @@ class Feignaz(Character):
     def attack(self, other, move):
         if move == "grapple":
             other.take_damage(7)
-            return "🤼 Grapple 7"
+            return "🤼 Grapples 7"
 
         elif move == "special":
             if self.meter >= 1:
@@ -248,7 +251,7 @@ class JohnCameraman(Character):
             self.meter = min(5, self.meter)
             dmg = self.meter
             other.take_damage(dmg)
-            return f"📸 Camera {dmg}"
+            return f"📸 Camera [{dmg}]"
 
         elif move == "special":
             if self.meter >= 1:
@@ -309,6 +312,10 @@ class BigKeyBoy(Character):
             other.take_damage(dmg)
             return f"🔑 Key {dmg}"
 
+        elif move == "crown":
+            self.pending_actions.append({"turns": 2, "damage": random.randint(4, 9), "target": other})
+            return "👑 Crown incoming"
+
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
@@ -336,6 +343,10 @@ class Incrediboy(Character):
 
         elif move == "taunt":
             return self.taunt()
+
+        else:
+            other.take_damage(4)
+            return "💥 Incrediboy hits"
 
 
 # =========================
