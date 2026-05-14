@@ -122,6 +122,14 @@ class Character:
     def take_damage(self, dmg):
         self.health = max(0, self.health - dmg)
 
+    def damage_amount(self, ratio):
+        return max(1, int(self.max_health * ratio))
+
+    def damage_range(self, low_ratio, high_ratio):
+        low = self.damage_amount(low_ratio)
+        high = max(low, int(self.max_health * high_ratio))
+        return random.randint(low, high)
+
     def heal(self, amount=5):
         self.health = min(self.max_health, self.health + amount)
 
@@ -144,14 +152,16 @@ class Character:
 class Feignaz(Character):
     def attack(self, other, move):
         if move == "grapple":
-            other.take_damage(7)
-            return "🤼 Grapples 7"
+            dmg = self.damage_amount(0.1)
+            other.take_damage(dmg)
+            return f"🤼 Grapples {dmg}"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                other.take_damage(20)
-                return "🤼 SPECIAL GRAPPLE (-1 meter)"
+                dmg = self.damage_amount(0.25)
+                other.take_damage(dmg)
+                return f"🤼 SPECIAL GRAPPLE {dmg} (-1 meter)"
             return "Not enough meter!"
 
         elif move == "taunt":
@@ -165,14 +175,14 @@ class Feignaz(Character):
 class Kazuki(Character):
     def attack(self, other, move):
         if move == "rush":
-            dmg = random.randint(2, 10)
+            dmg = self.damage_range(0.03, 0.13)
             other.take_damage(dmg)
             return f"⚡ Rush {dmg}"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                dmg = random.randint(10, 20)
+                dmg = self.damage_range(0.13, 0.27)
                 other.take_damage(dmg)
                 return f"⚡ OVERDRIVE {dmg} (-1 meter)"
             return "Not enough meter!"
@@ -188,13 +198,13 @@ class Kazuki(Character):
 class BrickAndMortar(Character):
     def attack(self, other, move):
         if move == "brick":
-            self.pending_actions.append({"turns": 2, "damage": 8, "target": other})
+            self.pending_actions.append({"turns": 2, "damage": self.damage_amount(0.107), "target": other})
             return "🧱 Brick incoming"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                self.pending_actions.append({"turns": 1, "damage": 15, "hits": 2, "target": other})
+                self.pending_actions.append({"turns": 1, "damage": self.damage_amount(0.2), "hits": 2, "target": other})
                 return "🧱 BUILDING COLLAPSE (-1 meter)"
             return "Not enough meter!"
 
@@ -205,14 +215,16 @@ class BrickAndMortar(Character):
 class BurnableDan(Character):
     def attack(self, other, move):
         if move == "fireball":
-            other.take_damage(3)
-            return "🔥 Fireball"
+            dmg = self.damage_amount(0.04)
+            other.take_damage(dmg)
+            return f"🔥 Fireball {dmg}"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                other.take_damage(18)
-                return "🔥 INFERNO (-1 meter)"
+                dmg = self.damage_amount(0.24)
+                other.take_damage(dmg)
+                return f"🔥 INFERNO {dmg} (-1 meter)"
             return "Not enough meter!"
 
         elif move == "taunt":
@@ -222,18 +234,20 @@ class BurnableDan(Character):
 class HughMann(Character):
     def attack(self, other, move):
         if move == "bonk":
-            self.pending_actions.append({"turns": 2, "hits": 3, "damage": 6, "target": other})
+            self.pending_actions.append({"turns": 2, "hits": 3, "damage": self.damage_amount(0.08), "target": other})
             return "🔨 Bonk incoming"
 
         elif move == "slashes":
-            other.take_damage(6)
-            return "⚔️ Slashes"
+            dmg = self.damage_amount(0.08)
+            other.take_damage(dmg)
+            return f"⚔️ Slashes {dmg}"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                other.take_damage(25)
-                return "🔧 FINAL JUDGEMENT (-1 meter)"
+                dmg = self.damage_amount(0.33)
+                other.take_damage(dmg)
+                return f"🔧 FINAL JUDGEMENT {dmg} (-1 meter)"
             return "Not enough meter!"
 
         elif move == "taunt":
@@ -256,8 +270,9 @@ class JohnCameraman(Character):
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                other.take_damage(15)
-                return "📸 VIRAL SHOT (-1 meter)"
+                dmg = self.damage_amount(0.2)
+                other.take_damage(dmg)
+                return f"📸 VIRAL SHOT {dmg} (-1 meter)"
             return "Not enough meter!"
 
         elif move == "taunt":
@@ -267,13 +282,13 @@ class JohnCameraman(Character):
 class PerryPenguin(Character):
     def attack(self, other, move):
         if move == "rush":
-            self.pending_actions.append({"turns": 2, "damage": 8, "hits": 2, "target": other})
+            self.pending_actions.append({"turns": 2, "damage": self.damage_amount(0.107), "hits": 2, "target": other})
             return "🐧 Rush delayed"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                self.pending_actions.append({"turns": 1, "damage": 10, "hits": 4, "target": other})
+                self.pending_actions.append({"turns": 1, "damage": self.damage_amount(0.133), "hits": 4, "target": other})
                 return "🐧 ANTARCTIC FURY (-1 meter)"
             return "Not enough meter!"
 
@@ -288,7 +303,8 @@ class Catscade(Character):
             return "😾 Avenge ready"
 
         elif move == "hit":
-            dmg = 6 + getattr(self, "next_bonus", 0)
+            base = self.damage_amount(0.08)
+            dmg = base + getattr(self, "next_bonus", 0)
             self.next_bonus = 0
             other.take_damage(dmg)
             return f"🐱 Hit {dmg}"
@@ -308,12 +324,12 @@ class Catscade(Character):
 class BigKeyBoy(Character):
     def attack(self, other, move):
         if move == "key":
-            dmg = random.randint(4, 9)
+            dmg = self.damage_range(0.053, 0.12)
             other.take_damage(dmg)
             return f"🔑 Key {dmg}"
 
         elif move == "crown":
-            self.pending_actions.append({"turns": 2, "damage": random.randint(4, 9), "target": other})
+            self.pending_actions.append({"turns": 2, "damage": self.damage_range(0.053, 0.12), "target": other})
             return "👑 Crown incoming"
 
         elif move == "special":
@@ -331,14 +347,16 @@ class BigKeyBoy(Character):
 class Incrediboy(Character):
     def attack(self, other, move):
         if move == "punch":
-            other.take_damage(4)
-            return "💥 Punch"
+            dmg = self.damage_amount(0.053)
+            other.take_damage(dmg)
+            return f"💥 Punch {dmg}"
 
         elif move == "special":
             if self.meter >= 1:
                 self.meter -= 1
-                other.take_damage(30)
-                return "💥 I'M INCREDIBLE (-1 meter)"
+                dmg = self.damage_amount(0.4)
+                other.take_damage(dmg)
+                return f"💥 I'M INCREDIBLE {dmg} (-1 meter)"
             return "Not enough meter!"
 
         elif move == "taunt":
