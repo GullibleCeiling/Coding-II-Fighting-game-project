@@ -94,10 +94,10 @@ TAUNT_QUOTES = {
     "Burnable Dan": "🔥 'This is fine.'",
     "Hugh-Mann": "🔧 'Judgement is inevitable.'",
     "John Cameraman": "📸 'Smile, you're on camera!'",
-    "Perry Penguin": "🐧 'Wark wark!'",
-    "Catscade": "😾 'You will regret that.'",
-    "Big Key Boy": "👑 'The crown always wins.'",
-    "Incrediboy": "💥 'I'm incredible!'"
+    "Perry Penguin": "🐧 'It's Perrying Time'",
+    "Catscade": "😾 'insert cat meow here'",
+    "Big Key Boy": "👑 'My friends are my power!'",
+    "Incrediboy": "💥 'AND INCREDIBOY'"
 }
 
 
@@ -505,3 +505,5 @@ def play():
 
 if __name__ == "__main__":
     play()
+
+

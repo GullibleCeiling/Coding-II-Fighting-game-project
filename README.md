@@ -1,4 +1,4 @@
-WELCOME TO SILLY PLAYGROUND: Balanced edition!
+WELCOME TO SILLY PLAYGROUND: Balanced edition! VIDEO HERE: https://www.loom.com/share/3f856e3cf1e740bba266c9f73b394e2d
 
 This is a turn based fighting game that has a total of 10 fighters who each have a unique special move
 
